@@ -23,7 +23,7 @@ func TestStation14(t *testing.T) {
 			WantKinds: []reflect.Kind{reflect.Int, reflect.Uint, reflect.Int8, reflect.Uint8, reflect.Int16,
 				reflect.Uint16, reflect.Int32, reflect.Uint32, reflect.Int64, reflect.Uint64},
 		},
-		"ReadTODORequest has Description field": {
+		"ReadTODORequest has Size field": {
 			Target:    model.ReadTODORequest{},
 			FieldName: "Size",
 			WantKinds: []reflect.Kind{reflect.Int, reflect.Uint, reflect.Int8, reflect.Uint8, reflect.Int16,
