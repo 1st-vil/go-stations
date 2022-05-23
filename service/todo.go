@@ -67,6 +67,38 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 		update  = `UPDATE todos SET subject = ?, description = ? WHERE id = ?`
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
+	
+	stmt, err := s.db.PrepareContext(ctx, update)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(subject, description, id)
+	if err != nil {
+		return nil, err
+	}
+	
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rows == 0 {
+		return nil, &model.ErrNotFound{id}
+	}
+
+	lastId, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	todo := model.TODO{ID: lastId}
+	err = s.db.QueryRowContext(ctx, confirm, lastId).Scan(&todo.Subject,&todo.Description,&todo.CreatedAt,&todo.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
 
 	return nil, nil
 }

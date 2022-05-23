@@ -6,10 +6,10 @@ import (
 
 type (
 	ErrNotFound struct{
-		FileName string
+		RowID int64
 	}
 )
 
 func (e *ErrNotFound) Error() string {
-	return fmt.Sprintf("The file %s was not found")
+	return fmt.Sprintf("The row with id %v was not found", e.RowID)
 }
