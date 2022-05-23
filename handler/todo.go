@@ -2,6 +2,9 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"log"
+	"net/http"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	"github.com/TechBowl-japan/go-stations/service"
@@ -16,6 +19,36 @@ type TODOHandler struct {
 func NewTODOHandler(svc *service.TODOService) *TODOHandler {
 	return &TODOHandler{
 		svc: svc,
+	}
+}
+
+func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		decoder := json.NewDecoder(r.Body)
+		var todo model.CreateTODORequest
+		if err := decoder.Decode(&todo); err != nil {
+			log.Println(err)
+			return
+		}
+		if todo.Subject == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		} else {
+			todo, err := h.svc.CreateTODO(r.Context(), todo.Subject, todo.Description)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			response := &model.CreateTODOResponse{*todo}
+			encoder := json.NewEncoder(w)
+			if err := encoder.Encode(response); err != nil {
+				log.Println(err)
+				return
+			}
+		}
+	default:
+
 	}
 }
 
