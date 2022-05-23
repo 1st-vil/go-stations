@@ -47,6 +47,30 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+	case http.MethodPut:
+		decoder := json.NewDecoder(r.Body)
+		var todo model.UpdateTODORequest
+		if err := decoder.Decode(&todo); err != nil {
+			log.Println(err)
+			return
+		}
+		if todo.ID == 0 || todo.Subject == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		} else {
+			todo, err := h.svc.UpdateTODO(r.Context(), todo.ID, todo.Subject, todo.Description)
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			response := &model.UpdateTODOResponse{*todo}
+			encoder := json.NewEncoder(w)
+			if err := encoder.Encode(response); err != nil {
+				log.Println(err)
+				return
+			}
+		}
 	default:
 
 	}

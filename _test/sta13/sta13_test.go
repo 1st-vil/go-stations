@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/TechBowl-japan/go-stations/db"
+	"github.com/TechBowl-japan/go-stations/service"
+	"github.com/TechBowl-japan/go-stations/handler"
 	"github.com/TechBowl-japan/go-stations/handler/router"
 
 	"github.com/google/go-cmp/cmp"
@@ -57,6 +59,8 @@ func TestStation13(t *testing.T) {
 	}
 
 	r := router.NewRouter(todoDB)
+	h := handler.NewTODOHandler(service.NewTODOService(todoDB))
+	r.Handle("/todos", h)
 	srv := httptest.NewServer(r)
 	defer srv.Close()
 
@@ -83,6 +87,11 @@ func TestStation13(t *testing.T) {
 			Subject:            "todo subject 2",
 			Description:        "todo description 2",
 			WantHTTPStatusCode: http.StatusOK,
+		},
+		"Personal Testcase": {
+			ID:                 2153,
+			Subject:            "todo subject 2153",
+			WantHTTPStatusCode: http.StatusBadRequest,
 		},
 	}
 
