@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"math"
+	"reflect"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	"github.com/TechBowl-japan/go-stations/service"
@@ -62,50 +63,78 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodPost:
 		decoder := json.NewDecoder(r.Body)
-		var todo model.CreateTODORequest
-		if err := decoder.Decode(&todo); err != nil {
+		var req model.CreateTODORequest
+		if err := decoder.Decode(&req); err != nil {
 			log.Println(err)
 			return
 		}
-		if todo.Subject == "" {
+		if req.Subject == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			return
-		} else {
-			todo, err := h.svc.CreateTODO(r.Context(), todo.Subject, todo.Description)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			response := &model.CreateTODOResponse{*todo}
-			encoder := json.NewEncoder(w)
-			if err := encoder.Encode(response); err != nil {
-				log.Println(err)
-				return
-			}
+		}
+		todo, err := h.svc.CreateTODO(r.Context(), req.Subject, req.Description)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		response := &model.CreateTODOResponse{*todo}
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(response); err != nil {
+			log.Println(err)
+			return
 		}
 	case http.MethodPut:
 		decoder := json.NewDecoder(r.Body)
-		var todo model.UpdateTODORequest
-		if err := decoder.Decode(&todo); err != nil {
+		var req model.UpdateTODORequest
+		if err := decoder.Decode(&req); err != nil {
 			log.Println(err)
 			return
 		}
-		if todo.ID == 0 || todo.Subject == "" {
+		if req.ID == 0 || req.Subject == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			return
-		} else {
-			todo, err := h.svc.UpdateTODO(r.Context(), todo.ID, todo.Subject, todo.Description)
-			if err != nil {
-				log.Println(err)
+		} 
+		todo, err := h.svc.UpdateTODO(r.Context(), req.ID, req.Subject, req.Description)
+		if err != nil {
+			log.Println(err)
+			if reflect.TypeOf(err) == reflect.TypeOf(&model.ErrNotFound{}) {
+				w.WriteHeader(http.StatusNotFound)
+			} else {
 				w.WriteHeader(http.StatusBadRequest)
-				return
 			}
-			response := &model.UpdateTODOResponse{*todo}
-			encoder := json.NewEncoder(w)
-			if err := encoder.Encode(response); err != nil {
-				log.Println(err)
-				return
+			return
+		}
+		response := &model.UpdateTODOResponse{*todo}
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(response); err != nil {
+			log.Println(err)
+			return
+		}
+	case http.MethodDelete:
+		decoder := json.NewDecoder(r.Body)
+		var req model.DeleteTODORequest
+		if err := decoder.Decode(&req); err != nil {
+			log.Println(err)
+			return
+		}
+		if len(req.IDs) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if err := h.svc.DeleteTODO(r.Context(), req.IDs); err != nil {
+			log.Println(err)
+			if reflect.TypeOf(err) == reflect.TypeOf(&model.ErrNotFound{}) {
+				w.WriteHeader(http.StatusNotFound)
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
 			}
+			return
+		}
+		response := &model.DeleteTODOResponse{}
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(response); err != nil {
+			log.Println(err)
+			return
 		}
 	default:
 

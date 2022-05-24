@@ -91,7 +91,7 @@ func TestStation13(t *testing.T) {
 		"Personal Testcase": {
 			ID:                 2153,
 			Subject:            "todo subject 2153",
-			WantHTTPStatusCode: http.StatusBadRequest,
+			WantHTTPStatusCode: http.StatusNotFound,
 		},
 	}
 
