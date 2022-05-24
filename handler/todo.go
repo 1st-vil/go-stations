@@ -35,6 +35,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			prev_id, err := strconv.ParseInt(r.URL.Query().Get("prev_id"), 10, 64)
 			if err != nil {
 				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			req.PrevID = prev_id
@@ -46,6 +47,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			size, err := strconv.ParseInt(r.URL.Query().Get("size"), 10, 64)
 			if err != nil {
 				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			req.Size = size
@@ -53,12 +55,14 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		todos, err := h.svc.ReadTODO(r.Context(), req.PrevID, req.Size)
 		if err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		response := &model.ReadTODOResponse{todos}
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	case http.MethodPost:
@@ -66,6 +70,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var req model.CreateTODORequest
 		if err := decoder.Decode(&req); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		if req.Subject == "" {
@@ -75,12 +80,14 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		todo, err := h.svc.CreateTODO(r.Context(), req.Subject, req.Description)
 		if err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		response := &model.CreateTODOResponse{*todo}
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	case http.MethodPut:
@@ -88,6 +95,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var req model.UpdateTODORequest
 		if err := decoder.Decode(&req); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		if req.ID == 0 || req.Subject == "" {
@@ -108,6 +116,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	case http.MethodDelete:
@@ -115,6 +124,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var req model.DeleteTODORequest
 		if err := decoder.Decode(&req); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		if len(req.IDs) == 0 {
@@ -134,6 +144,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	default:
