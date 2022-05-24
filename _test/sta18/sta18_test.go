@@ -83,6 +83,10 @@ func TestStation18(t *testing.T) {
 			IDs:       []int64{2, 3},
 			WantError: nil,
 		},
+		"Personal Testcase": {
+			IDs:       []int64{4,5,6,7,8,9},
+			WantError: &model.ErrNotFound{},
+		},
 	}
 
 	for name, tc := range testcases {
