@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
+	"math"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	"github.com/TechBowl-japan/go-stations/service"
@@ -24,6 +26,40 @@ func NewTODOHandler(svc *service.TODOService) *TODOHandler {
 
 func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case http.MethodGet:
+		var req model.ReadTODORequest
+		if len(r.URL.Query().Get("prev_id")) == 0 {
+			req.PrevID = 0
+		} else {
+			prev_id, err := strconv.ParseInt(r.URL.Query().Get("prev_id"), 10, 64)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			req.PrevID = prev_id
+		}
+		
+		if len(r.URL.Query().Get("size")) == 0 {
+			req.Size = int64(math.MaxInt64)
+		} else {
+			size, err := strconv.ParseInt(r.URL.Query().Get("size"), 10, 64)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			req.Size = size
+		}
+		todos, err := h.svc.ReadTODO(r.Context(), req.PrevID, req.Size)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		response := &model.ReadTODOResponse{todos}
+		encoder := json.NewEncoder(w)
+		if err := encoder.Encode(response); err != nil {
+			log.Println(err)
+			return
+		}
 	case http.MethodPost:
 		decoder := json.NewDecoder(r.Body)
 		var todo model.CreateTODORequest
