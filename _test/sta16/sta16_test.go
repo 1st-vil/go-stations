@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/TechBowl-japan/go-stations/db"
+	"github.com/TechBowl-japan/go-stations/service"
+	"github.com/TechBowl-japan/go-stations/handler"
 	"github.com/TechBowl-japan/go-stations/handler/router"
 )
 
@@ -57,6 +59,8 @@ func TestStation16(t *testing.T) {
 	}
 
 	r := router.NewRouter(todoDB)
+	h := handler.NewTODOHandler(service.NewTODOService(todoDB))
+	r.Handle("/todos", h)
 	srv := httptest.NewServer(r)
 	defer srv.Close()
 

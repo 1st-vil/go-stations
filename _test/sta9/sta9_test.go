@@ -14,7 +14,9 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/TechBowl-japan/go-stations/db"
+	"github.com/TechBowl-japan/go-stations/handler"
 	"github.com/TechBowl-japan/go-stations/handler/router"
+	"github.com/TechBowl-japan/go-stations/service"
 )
 
 func TestStation9(t *testing.T) {
@@ -37,6 +39,8 @@ func TestStation9(t *testing.T) {
 		return
 	}
 	r := router.NewRouter(todoDB)
+	h := handler.NewTODOHandler(service.NewTODOService(todoDB))
+	r.Handle("/todos", h)
 	srv := httptest.NewServer(r)
 	defer srv.Close()
 

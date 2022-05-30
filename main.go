@@ -2,12 +2,15 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"time"
-	"net/http"
 
 	"github.com/TechBowl-japan/go-stations/db"
+	"github.com/TechBowl-japan/go-stations/handler"
+	"github.com/TechBowl-japan/go-stations/handler/middleware"
 	"github.com/TechBowl-japan/go-stations/handler/router"
+	"github.com/TechBowl-japan/go-stations/service"
 )
 
 func main() {
@@ -52,6 +55,11 @@ func realMain() error {
 	mux := router.NewRouter(todoDB)
 
 	// TODO: ここから実装を行う
+
+	mux.Handle("/healthz", handler.NewHealthzHandler())
+	mux.Handle("/todos", handler.NewTODOHandler(service.NewTODOService(todoDB)))
+	mux.Handle("/do-panic-recover", middleware.Recovery(handler.NewPanicHandler()))
+	mux.Handle("/do-panic", handler.NewPanicHandler())
 
 	http.ListenAndServe(port, mux)
 
