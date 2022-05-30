@@ -14,9 +14,9 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/TechBowl-japan/go-stations/db"
-	"github.com/TechBowl-japan/go-stations/service"
 	"github.com/TechBowl-japan/go-stations/handler"
 	"github.com/TechBowl-japan/go-stations/handler/router"
+	"github.com/TechBowl-japan/go-stations/service"
 )
 
 func TestStation9(t *testing.T) {

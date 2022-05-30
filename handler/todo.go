@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"net/http"
-	"strconv"
 	"math"
+	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	"github.com/TechBowl-japan/go-stations/service"
@@ -40,7 +40,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			req.PrevID = prev_id
 		}
-		
+
 		if len(r.URL.Query().Get("size")) == 0 {
 			req.Size = int64(math.MaxInt64)
 		} else {
@@ -58,7 +58,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		response := &model.ReadTODOResponse{todos}
+		response := &model.ReadTODOResponse{TODOs: todos}
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
@@ -67,8 +67,8 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodPost:
 		decoder := json.NewDecoder(r.Body)
-		var req model.CreateTODORequest
-		if err := decoder.Decode(&req); err != nil {
+		req := &model.CreateTODORequest{}
+		if err := decoder.Decode(req); err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -83,7 +83,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		response := &model.CreateTODOResponse{*todo}
+		response := &model.CreateTODOResponse{TODO: *todo}
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
@@ -92,8 +92,8 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodPut:
 		decoder := json.NewDecoder(r.Body)
-		var req model.UpdateTODORequest
-		if err := decoder.Decode(&req); err != nil {
+		req := &model.UpdateTODORequest{}
+		if err := decoder.Decode(req); err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -101,7 +101,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if req.ID == 0 || req.Subject == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			return
-		} 
+		}
 		todo, err := h.svc.UpdateTODO(r.Context(), req.ID, req.Subject, req.Description)
 		if err != nil {
 			log.Println(err)
@@ -112,7 +112,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-		response := &model.UpdateTODOResponse{*todo}
+		response := &model.UpdateTODOResponse{TODO: *todo}
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(response); err != nil {
 			log.Println(err)
@@ -121,8 +121,8 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodDelete:
 		decoder := json.NewDecoder(r.Body)
-		var req model.DeleteTODORequest
-		if err := decoder.Decode(&req); err != nil {
+		req := &model.DeleteTODORequest{}
+		if err := decoder.Decode(req); err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
