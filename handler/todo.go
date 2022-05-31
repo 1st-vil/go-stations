@@ -28,7 +28,7 @@ func NewTODOHandler(svc *service.TODOService) *TODOHandler {
 func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		var req model.ReadTODORequest
+		req := &model.ReadTODORequest{}
 		if len(r.URL.Query().Get("prev_id")) == 0 {
 			req.PrevID = 0
 		} else {

@@ -56,7 +56,7 @@ func realMain() error {
 
 	// TODO: ここから実装を行う
 
-	mux.Handle("/healthz", handler.NewHealthzHandler())
+	mux.Handle("/healthz", middleware.GetOS(middleware.GetAccessLog(handler.NewHealthzHandler())))
 	mux.Handle("/todos", handler.NewTODOHandler(service.NewTODOService(todoDB)))
 	mux.Handle("/do-panic-recover", middleware.Recovery(handler.NewPanicHandler()))
 	mux.Handle("/do-panic", handler.NewPanicHandler())

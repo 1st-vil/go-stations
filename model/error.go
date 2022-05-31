@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	ErrNotFound struct{
+	ErrNotFound struct {
 		RowIDs []int64
 	}
 )
