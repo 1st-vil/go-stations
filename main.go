@@ -11,6 +11,7 @@ import (
 	"github.com/TechBowl-japan/go-stations/handler/middleware"
 	"github.com/TechBowl-japan/go-stations/handler/router"
 	"github.com/TechBowl-japan/go-stations/service"
+	"github.com/justinas/alice"
 )
 
 func main() {
@@ -55,11 +56,12 @@ func realMain() error {
 	mux := router.NewRouter(todoDB)
 
 	// TODO: ここから実装を行う
-
-	mux.Handle("/healthz", middleware.GetOS(middleware.GetAccessLog(handler.NewHealthzHandler())))
-	mux.Handle("/todos", handler.NewTODOHandler(service.NewTODOService(todoDB)))
-	mux.Handle("/do-panic-recover", middleware.Recovery(handler.NewPanicHandler()))
-	mux.Handle("/do-panic", handler.NewPanicHandler())
+	logChain := alice.New(middleware.GetOS, middleware.GetAccessLog)
+	mux.Handle("/healthz", logChain.Then(handler.NewHealthzHandler()))
+	hTODO := handler.NewTODOHandler(service.NewTODOService(todoDB))
+	mux.Handle("/todos", logChain.Then(hTODO))
+	hPanic := handler.NewPanicHandler()
+	mux.Handle("/do-panic", logChain.Append(middleware.Recovery).Then(hPanic))
 
 	http.ListenAndServe(port, mux)
 

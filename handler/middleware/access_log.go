@@ -18,7 +18,7 @@ func GetAccessLog(h http.Handler) http.Handler {
 
 		res := &model.AccessLog{
 			Timestamp: start,
-			Latency:   time.Since(start).Microseconds(),
+			Latency:   time.Since(start).Milliseconds(),
 			Path:      r.URL.Path,
 		}
 		OS, err := OSFromContext(r.Context())
