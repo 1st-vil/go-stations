@@ -18,3 +18,8 @@
 node_modules
 .DS_Store
 .techtrain/config.toml
+
+# local env files
+.env
+.env.local
+.env.*.local
