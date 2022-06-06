@@ -13,7 +13,7 @@ type contextKey struct{}
 var OSKey contextKey
 
 func ContextWithOS(parent context.Context, r *http.Request) context.Context {
-	return context.WithValue(r.Context(), OSKey, ua.Parse(r.UserAgent()).OS)
+	return context.WithValue(parent, OSKey, ua.Parse(r.UserAgent()).OS)
 }
 
 func OSFromContext(ctx context.Context) (string, error) {
