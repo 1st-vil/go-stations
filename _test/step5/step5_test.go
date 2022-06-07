@@ -90,12 +90,6 @@ func TestStation19(t *testing.T) {
 			Password:           "",
 			WantHTTPStatusCode: http.StatusUnauthorized,
 		},
-		"UserID and Password are not provided": {
-			Path:               "/todos",
-			UserID:             "-1",
-			Password:           "-1",
-			WantHTTPStatusCode: http.StatusUnauthorized,
-		},
 	}
 
 	for name, tc := range testcases {
@@ -104,9 +98,6 @@ func TestStation19(t *testing.T) {
 			if err != nil {
 				t.Errorf("リクエストの作成に失敗しました: %v", err)
 				return
-			}
-			if tc.UserID != "-1" && tc.Password != "-1" {
-				req.SetBasicAuth(tc.UserID, tc.Password)
 			}
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
