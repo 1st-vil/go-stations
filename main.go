@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/TechBowl-japan/go-stations/db"
@@ -67,8 +69,27 @@ func realMain() error {
 	mux.Handle("/todos", logChain.Append(middleware.BasicAuth).Then(hTODO))
 	hPanic := handler.NewPanicHandler()
 	mux.Handle("/do-panic", logChain.Append(middleware.Recovery).Then(hPanic))
+	srv := &http.Server{
+		Addr:    port,
+		Handler: mux,
+	}
 
-	http.ListenAndServe(port, mux)
+	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	go func() {
+		<-ctx.Done()
+
+		log.Println("Graceful Shutdown")
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		return err
+	}
 
 	return nil
 }
