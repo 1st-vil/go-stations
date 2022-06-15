@@ -1,4 +1,4 @@
-package sta19_test
+package step5_test
 
 import (
 	"net/http"
@@ -99,6 +99,7 @@ func TestStation19(t *testing.T) {
 				t.Errorf("リクエストの作成に失敗しました: %v", err)
 				return
 			}
+			req.SetBasicAuth(tc.UserID, tc.Password)
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				t.Errorf("リクエストの送信に失敗しました: %v", err)
